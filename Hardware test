@@ -1,0 +1,28 @@
+// define pins
+
+int[] myLEDPins = {1 2 3 4 5 6};
+int buttonPin = 7; 
+
+void setup() {
+  // setup LED pins
+  pinMode(myLEDPins[0],OUTPUT);
+  pinMode(myLEDPins[1],OUTPUT);
+  pinMode(myLEDPins[2],OUTPUT);
+  pinMode(myLEDPins[3],OUTPUT);
+  pinMode(myLEDPins[4],OUTPUT);
+  pinMode(myLEDPins[5],OUTPUT);
+  // setup button pin
+  pinMode(buttonPin,INPUT);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  for (int i = 1; i <= 6; i++)
+  {
+    delay(1000);
+    digitalWrite(i,HIGH);
+    delay(3000);
+    digitalWrite(i,LOW);
+  }
+  
+}
