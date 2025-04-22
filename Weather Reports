@@ -1,0 +1,57 @@
+#include <WiFi.h>
+#include <TaskScheduler.h>
+#include <HTTPClient.h>
+#include <Arduino_JSON.h>
+
+#define _TASK_SLEEP_ON_IDLE_RUN
+#define _TASK_STATUS_REQUEST
+
+StatusRequest st;
+
+Scheduler ts;
+
+
+
+const char* ssid = "UoB-IoT";    
+const char* password = "4rmhwd99"; // Remember to change this to the actual password you got in step 2. 
+const char* url = //API: https://api.openweathermap.org/data/2.5/weather?lat=51.38045&lon=-2.32255&appid=92b9273b242ac133b267f8b8e3e1b6f0;
+
+void getHTML() {
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    http.begin(url);
+    int httpCode = http.GET();
+
+    if (httpCode > 0) {
+      String payload = http.getString();
+      Serial.println(httpCode);
+      Serial.println(payload);
+    } else {
+      Serial.println("Error on HTTP request");
+    }
+    http.end();
+  } else {
+    Serial.println("Not connected to WiFi");
+  }
+}
+
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.println("WiFi connected.");
+  
+
+
+}
+
+void loop() {
+
+
+}
