@@ -1,40 +1,17 @@
 #include <WiFi.h>
-#include <TaskScheduler.h>
 #include <HTTPClient.h>
 #include <Arduino_JSON.h>
 
-#define _TASK_SLEEP_ON_IDLE_RUN
-#define _TASK_STATUS_REQUEST
-
-StatusRequest st;
-
-Scheduler ts;
-
-
-
 const char* ssid = "UoB-IoT";    
-const char* password = "4rmhwd99"; // Remember to change this to the actual password you got in step 2. 
-const char* url = //API: https://api.openweathermap.org/data/2.5/weather?lat=51.38045&lon=-2.32255&appid=92b9273b242ac133b267f8b8e3e1b6f0;
+const char* password = "kag3vp8y"; // Remember to change this to the actual password you got in step 2. 
+const char* url ="https://api.openweathermap.org/data/2.5/weather?lat=51.38045&lon=-2.32255&appid=92b9273b242ac133b267f8b8e3e1b6f0";
 
-void getHTML() {
-  if (WiFi.status() == WL_CONNECTED) {
-    HTTPClient http;
-    http.begin(url);
-    int httpCode = http.GET();
-
-    if (httpCode > 0) {
-      String payload = http.getString();
-      Serial.println(httpCode);
-      Serial.println(payload);
-    } else {
-      Serial.println("Error on HTTP request");
-    }
-    http.end();
-  } else {
-    Serial.println("Not connected to WiFi");
-  }
-}
-
+boolean sun = false;
+boolean frozen = false;
+boolean rain = false;
+boolean cloud = false;
+boolean wind = false;
+boolean mode = false;
 
 void setup() {
   Serial.begin(115200);
@@ -47,11 +24,197 @@ void setup() {
   Serial.println("");
   Serial.println("WiFi connected.");
   
+  //set up LEDs
+  pinMode(D1, OUTPUT);
+  pinMode(D2, OUTPUT);
+  pinMode(D3, OUTPUT);
+  pinMode(D4, OUTPUT);
+  pinMode(D5, OUTPUT);
+  pinMode(D6, OUTPUT);
 
+  //set up button
+  pinMode(D7, INPUT);
+  //call weather
+  reset();
+  String i = getIcon();
+  checkWeather(i);
 
 }
 
 void loop() {
+  //turn off yellow LED
+  digitalWrite(D1, LOW);
 
+  //turn on LEDs
+  turnOnLED();
+  delay(5000);
+  turnOffLED();
+  delay(60000);
+  return;
+}
 
+String getIcon() {
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    http.begin(url);
+    int httpCode = http.GET();
+
+    if (httpCode > 0) {
+      String payload = http.getString();
+      Serial.println(httpCode);
+      Serial.println(payload);
+      //get JSON from http 
+      JSONVar json = JSON.parse(payload);
+
+      if (JSON.typeof(json) != "undefined") {
+        JSONVar w = json["weather"][0];
+        String icon = w["icon"];
+        Serial.print("Icon: ");
+        Serial.println(icon);
+        return icon;
+      } 
+      else {
+      Serial.println("Parsing the JSON failed!");
+      return "";
+      }
+
+    } else {
+      Serial.println("Error on HTTP request");
+      return "";
+    }
+    http.end();
+  } else {
+    Serial.println("Not connected to WiFi");
+    return "";
+  }
+}
+
+void checkWeather(String i)
+{
+  if (i.substring(2) == "d")
+  {
+    sun = true;
+    Serial.println("daytime");
+  }
+  else if (i.substring(2) == "n")
+  {
+    sun = false;
+    Serial.println("nighttime");
+  }
+
+  if (i.substring(0,2) == "02")
+  {
+    cloud = true;
+    Serial.println("few clouds");
+  }
+  else if (i.substring(0,2) == "03")
+  {
+    cloud = true;
+    sun = false;
+    Serial.println("scattered clouds");
+  }
+  else if (i.substring(0,2) == "04")
+  {
+    cloud = true;
+    sun = false;
+    Serial.println("broken clouds");
+  }
+  else if (i.substring(0,2) == "09")
+  {
+    cloud = true;
+    sun = false;
+    rain = true;
+    Serial.println("shower rain");
+  }
+  else if (i.substring(0,2) == "10")
+  {
+    cloud = true;
+    rain = true;
+    Serial.println("rain");
+  }
+  else if (i.substring(0,2) == "11")
+  {
+    cloud = true;
+    sun = false;
+    rain = true;
+    wind = true;
+    Serial.println("thunderstorm");
+  }
+  else if (i.substring(0,2) == "13")
+  {
+    frozen = true;
+    Serial.println("snow");
+  }
+  else if (i.substring(0,2) == "50")
+  {
+    cloud = true;
+    wind = true;
+    Serial.println("mist");
+  }
+}
+
+void turnOnLED()
+{
+  if (sun)
+  {
+    digitalWrite(D1, HIGH);
+  }
+  if (wind)
+  {
+    digitalWrite(D2,HIGH);
+  }
+  if (cloud)
+  {
+    digitalWrite(D3, HIGH);
+  }
+  if (rain)
+  {
+    digitalWrite(D4, HIGH);
+  }
+  if (mode)
+  {
+    digitalWrite(D5, HIGH);
+  }
+  if (frozen)
+  {
+    digitalWrite(D6, HIGH);
+  }
+}
+
+void turnOffLED()
+{
+  if (sun)
+  {
+    digitalWrite(D1, LOW);
+  }
+  if (wind)
+  {
+    digitalWrite(D2,LOW);
+  }
+  if (cloud)
+  {
+    digitalWrite(D3, LOW);
+  }
+  if (rain)
+  {
+    digitalWrite(D4, LOW);
+  }
+  if (mode)
+  {
+    digitalWrite(D5, LOW);
+  }
+  if (frozen)
+  {
+    digitalWrite(D6, LOW);
+  }
+}
+
+void reset()
+{
+  sun = false;
+  frozen = false;
+  rain = false;
+  cloud = false;
+  wind = false;
+  mode = false;
 }
