@@ -13,6 +13,10 @@ boolean cloud = false;
 boolean wind = false;
 boolean mode = false;
 
+//on or off
+boolean on = false; 
+boolean buttonPressed = false;
+
 void setup() {
   Serial.begin(115200);
   WiFi.begin(ssid, password);
@@ -34,23 +38,46 @@ void setup() {
 
   //set up button
   pinMode(D7, INPUT);
-  //call weather
-  reset();
-  String i = getIcon();
-  checkWeather(i);
+  //turn off yellow LED
+  digitalWrite(D1, LOW);
 
 }
 
 void loop() {
   //turn off yellow LED
   digitalWrite(D1, LOW);
+  
+  delay(100); //for stability
 
-  //turn on LEDs
-  turnOnLED();
-  delay(5000);
-  turnOffLED();
-  delay(60000);
-  return;
+  if (digitalRead(D7)==1)  //button reads high whenever it's pressed
+  {
+    on = !on;
+    buttonPressed = true;
+    delay(1000);
+    Serial.println("button pressed");
+  }
+
+  if(on && buttonPressed)
+  {
+    weatherSetter();
+    turnOnLED();
+    buttonPressed = false;
+    Serial.println("turning on LEDs...");
+  }
+  else if (!on && buttonPressed)
+  {
+    turnOffLED();
+    buttonPressed = false;
+    Serial.println("turning off LEDs...");
+  }
+}
+
+void weatherSetter()
+{
+  //call weather
+  reset();
+  String i = getIcon();
+  checkWeather(i);
 }
 
 String getIcon() {
@@ -218,3 +245,37 @@ void reset()
   wind = false;
   mode = false;
 }
+
+
+
+// digitalWrite(D1, HIGH);
+//   delay(3000);
+//   digitalWrite(D1,LOW);
+//   delay(1000);
+
+//   digitalWrite(D2, HIGH);
+//   delay(3000);
+//   digitalWrite(D2,LOW);
+//   delay(1000);
+
+//   digitalWrite(D3, HIGH);
+//   delay(3000);
+//   digitalWrite(D3,LOW);
+//   delay(1000);
+
+//   digitalWrite(D4, HIGH);
+//   delay(3000);
+//   digitalWrite(D4,LOW);
+//   delay(1000);
+
+//   digitalWrite(D5, HIGH);
+//   delay(3000);
+//   digitalWrite(D5,LOW);
+//   delay(1000);
+
+//   digitalWrite(D6, HIGH);
+//   delay(3000);
+//   digitalWrite(D6,LOW);
+//   delay(1000);
+  
+//   delay(1000000);
