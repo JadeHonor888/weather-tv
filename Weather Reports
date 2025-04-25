@@ -3,7 +3,8 @@
 #include <Arduino_JSON.h>
 
 const char* ssid = "UoB-IoT";    
-const char* password = "kag3vp8y"; // Remember to change this to the actual password you got in step 2. 
+//const char* password = "kag3vp8y"; // Mattieu's
+const char* password = "4rmhwd99"; // Jade's
 const char* url ="https://api.openweathermap.org/data/2.5/weather?lat=51.38045&lon=-2.32255&appid=92b9273b242ac133b267f8b8e3e1b6f0";
 
 boolean sun = false;
@@ -45,7 +46,7 @@ void setup() {
 
 void loop() {
   //turn off yellow LED
-  digitalWrite(D1, LOW);
+  //digitalWrite(D1, LOW);
   
   delay(100); //for stability
 
