@@ -1,5 +1,5 @@
 **Modular LED Display**
-  This diplays the weather at a chosen location (must be changed in the code manually), and 
+This diplays the weather at a chosen location (must be changed in the code manually), and 
 Parts include:
 - PCB _(see Gerber files)_
 - Acrylic sheets
