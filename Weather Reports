@@ -2,11 +2,15 @@
 #include <HTTPClient.h>
 #include <Arduino_JSON.h>
 
+// connecting to the wifi 
 const char* ssid = "UoB-IoT";    
 //const char* password = "kag3vp8y"; // Mattieu's
 const char* password = "4rmhwd99"; // Jade's
+
+// OpenWeather API
 const char* url ="https://api.openweathermap.org/data/2.5/weather?lat=51.38045&lon=-2.32255&appid=92b9273b242ac133b267f8b8e3e1b6f0";
 
+// weather states for LEDs
 boolean sun = false;
 boolean frozen = false;
 boolean rain = false;
@@ -22,6 +26,7 @@ void setup() {
   Serial.begin(115200);
   WiFi.begin(ssid, password);
 
+  // set up Wi-Fi
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
@@ -39,15 +44,13 @@ void setup() {
 
   //set up button
   pinMode(D7, INPUT);
-  //turn off yellow LED
+
+  //turn off yellow LED (there may be an odd connection somewhere allowing the yellow LED to turn on when it shouldn't)
   digitalWrite(D1, LOW);
 
 }
 
 void loop() {
-  //turn off yellow LED
-  //digitalWrite(D1, LOW);
-  
   delay(100); //for stability
 
   if (digitalRead(D7)==1)  //button reads high whenever it's pressed
@@ -58,15 +61,17 @@ void loop() {
     Serial.println("button pressed");
   }
 
-  if(on && buttonPressed)
+  if(on && buttonPressed)  //if it's turning on...
   {
+    //update weather and turn on LEDs
     weatherSetter();
     turnOnLED();
     buttonPressed = false;
     Serial.println("turning on LEDs...");
   }
-  else if (!on && buttonPressed)
+  else if (!on && buttonPressed)  //if it's turning off...
   {
+    //turn off LEDs 
     turnOffLED();
     buttonPressed = false;
     Serial.println("turning off LEDs...");
@@ -75,7 +80,7 @@ void loop() {
 
 void weatherSetter()
 {
-  //call weather
+  //sets all weather states for the LEDs, ready to turn on LEDs
   reset();
   String i = getIcon();
   checkWeather(i);
@@ -91,10 +96,12 @@ String getIcon() {
       String payload = http.getString();
       Serial.println(httpCode);
       Serial.println(payload);
+
       //get JSON from http 
       JSONVar json = JSON.parse(payload);
 
       if (JSON.typeof(json) != "undefined") {
+      //get the "icon" variable which is found in the "weather" subsection
         JSONVar w = json["weather"][0];
         String icon = w["icon"];
         Serial.print("Icon: ");
@@ -119,10 +126,11 @@ String getIcon() {
 
 void checkWeather(String i)
 {
+//with the code extracted from getIcon() we can set the weather states
   if (i.substring(2) == "d")
   {
     sun = true;
-    Serial.println("daytime");
+    Serial.println("daytime");  //for debugging purposes
   }
   else if (i.substring(2) == "n")
   {
@@ -181,7 +189,7 @@ void checkWeather(String i)
   }
 }
 
-void turnOnLED()
+void turnOnLED()  //turn on LEDs according to the weather states
 {
   if (sun)
   {
@@ -209,35 +217,17 @@ void turnOnLED()
   }
 }
 
-void turnOffLED()
+void turnOffLED()  //turn off LEDs
 {
-  if (sun)
-  {
-    digitalWrite(D1, LOW);
-  }
-  if (wind)
-  {
-    digitalWrite(D2,LOW);
-  }
-  if (cloud)
-  {
-    digitalWrite(D3, LOW);
-  }
-  if (rain)
-  {
-    digitalWrite(D4, LOW);
-  }
-  if (mode)
-  {
-    digitalWrite(D5, LOW);
-  }
-  if (frozen)
-  {
-    digitalWrite(D6, LOW);
-  }
+  digitalWrite(D1, LOW);
+  digitalWrite(D2, LOW);
+  digitalWrite(D3, LOW);
+  digitalWrite(D4, LOW);
+  digitalWrite(D5, LOW);
+  digitalWrite(D6, LOW);
 }
 
-void reset()
+void reset()  //reset weather states in preparation of the next update
 {
   sun = false;
   frozen = false;
@@ -246,37 +236,3 @@ void reset()
   wind = false;
   mode = false;
 }
-
-
-
-// digitalWrite(D1, HIGH);
-//   delay(3000);
-//   digitalWrite(D1,LOW);
-//   delay(1000);
-
-//   digitalWrite(D2, HIGH);
-//   delay(3000);
-//   digitalWrite(D2,LOW);
-//   delay(1000);
-
-//   digitalWrite(D3, HIGH);
-//   delay(3000);
-//   digitalWrite(D3,LOW);
-//   delay(1000);
-
-//   digitalWrite(D4, HIGH);
-//   delay(3000);
-//   digitalWrite(D4,LOW);
-//   delay(1000);
-
-//   digitalWrite(D5, HIGH);
-//   delay(3000);
-//   digitalWrite(D5,LOW);
-//   delay(1000);
-
-//   digitalWrite(D6, HIGH);
-//   delay(3000);
-//   digitalWrite(D6,LOW);
-//   delay(1000);
-  
-//   delay(1000000);
